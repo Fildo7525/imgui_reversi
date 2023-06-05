@@ -1,6 +1,5 @@
 #include "Tile.h"
 
-
 Tile::Tile(std::shared_ptr<Player> ocupant, ImColor color)
 	: m_ocupant(ocupant)
 	, m_color(color)

@@ -12,8 +12,15 @@ class Board
 {
 public:
 	using Tiles = std::vector<std::vector<Tile>>;
-	Board();
+	explicit Board(int boardSize);
 	void render() override;
+
+	Board &setBoardSize(int size);
+	int &boardSize() { return m_boardSize; }
+	std::vector<int> scores() const;
+	std::vector<std::shared_ptr<Player>> players() const;
+	std::shared_ptr<Player> currentPlayer() const;
+	bool isGameOver() const { return m_gameOver; }
 
 private:
 	struct Direction {
@@ -40,10 +47,12 @@ private:
 
 	void findBestTileCapture();
 	bool isGamePlayable();
+	int getPlayerScore(std::shared_ptr<Player> player) const;
 
 private:
 	std::shared_ptr<Player> m_currentPlayer;
 	std::vector<std::shared_ptr<Player>> m_players;
 	Tiles m_tiles;
 	bool m_gameOver;
+	int m_boardSize;
 };

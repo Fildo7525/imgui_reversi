@@ -6,11 +6,14 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <numeric>
 #include <iostream>
 #include <sstream>
 
-Board::Board()
-	: m_gameOver(false)
+Board::Board(int boardSize)
+	: Layer("Board")
+	, m_gameOver(false)
+	, m_boardSize(boardSize)
 {
 	std::shared_ptr<Player> playerOne(new Player(1,
 											  "User",
@@ -30,41 +33,40 @@ Board::Board()
 void Board::render()
 {
 	if (m_gameOver) {
-		ImGui::Begin("Game Over");
-		int user = 0;
-		int pc = 0;
-		for(auto &line : m_tiles) {
-			for(auto &tile : line) {
-				if (tile.ocupant() == m_players.front()) {
-					user++;
-				} else if (tile.ocupant() == m_players.back()) {
-					pc++;
-				}
-			}
-		}
+		ImGui::Begin("Game Over", NULL, m_windowFlags);
+
+		int user = scores().front();
+		int pc = scores().back();
+
 		auto winner = user > pc ? m_players.front() : m_players.back();
 		auto winnerScore = user > pc ? user : pc;
 		auto loser = user > pc ? m_players.back() : m_players.front();
 		auto loserScore = user > pc ? pc : user;
+
 		std::stringstream ss;
 		ss << "Game Over the winner is " << winner->name() << " with " << winnerScore << " points.\n"
 		   << "The loser is " << loser->name() << " with " << loserScore << " points.";
 		ImGui::Text("%s", ss.str().c_str());
+
 		if (ImGui::Button("Play again")) {
 			m_gameOver = false;
+			std::for_each(m_players.begin(), m_players.end(), [](std::shared_ptr<Player> &player) {
+				player->resetScore();
+			});
 			initTiles();
 		}
+
 		ImGui::End();
 	}
 
-	ImGui::Begin("Board");
+	ImGui::Begin("Board", NULL, m_windowFlags);
 
-	for (int y = 0; y < m_tiles.size(); y++) {
+	for (int y = 0; y < m_boardSize; y++) {
 		for (int x = 0; x < m_tiles.front().size(); x++) {
 			if (x > 0) {
 				ImGui::SameLine(x*84+8);
 			}
-			int id = y * m_tiles.size() + x;
+			int id = y * m_boardSize + x;
 			ImGui::PushID(id);
 
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)m_tiles[y][x].color());
@@ -80,7 +82,10 @@ void Board::render()
 				if (ImGui::Button("", ImVec2(80, 80))) {
 					if (isTilePlayable(x, y)) {
 						m_tiles[y][x].setOcupant(m_currentPlayer);
-						m_currentPlayer->increaseScoreBy(changeOponentTiles(x, y));
+						changeOponentTiles(x, y);
+						for(auto &player : m_players) {
+							player->setScore(getPlayerScore(player));
+						}
 						m_currentPlayer = m_currentPlayer == m_players.front() ? m_players.back() : m_players.front();
 						findBestTileCapture();
 					}
@@ -94,6 +99,35 @@ void Board::render()
 	ImGui::End();
 }
 
+Board &Board::setBoardSize(int size)
+{
+	m_boardSize = size;
+	initTiles();
+	return *this;
+}
+
+std::vector<int> Board::scores() const
+{
+	std::vector<int> playerScores;
+	playerScores.reserve(m_players.size());
+	std::transform(m_players.cbegin(),
+					m_players.cend(),
+					std::back_inserter(playerScores),
+					[](auto &player) { return player->score(); });
+
+	return playerScores;
+}
+
+std::vector<std::shared_ptr<Player>> Board::players() const
+{
+	return m_players;
+}
+
+std::shared_ptr<Player> Board::currentPlayer() const
+{
+	return m_currentPlayer;
+}
+
 void Board::initTiles()
 {
 	std::shared_ptr<Player> defaultPlayer(new Player(-1, "Empty", Player::Ocupant::Empty, "", 0, 0));
@@ -102,10 +136,10 @@ void Board::initTiles()
 	ImVec4 orange = (ImVec4)ImColor::HSV(1.1f, 0.6f, 0.6f, 0.5f);
 
 	m_tiles.clear();
-	m_tiles.resize(8);
-	for (int y = 0; y < m_tiles.size(); y++) {
+	m_tiles.resize(m_boardSize);
+	for (int y = 0; y < m_boardSize; y++) {
 		std::vector<Tile> row;
-		for (size_t x = 0; x < m_tiles.size(); x++) {
+		for (size_t x = 0; x < m_boardSize; x++) {
 			ImVec4 color;
 			if (y % 2) {
 				color = x % 2 ? green : orange;
@@ -128,11 +162,11 @@ void Board::initTiles()
 
 Player::Ocupant Board::middleTilePlayer(int y, int x)
 {
-	if (y == m_tiles.size()/2 - 1 || y == m_tiles.size()/2) {
+	if (y == m_boardSize/2 - 1 || y == m_boardSize/2) {
 		if (x == y) {
 			return Player::Ocupant::Black;
 		}
-		else if (x == m_tiles.size()/2 - 1 || x == m_tiles.size()/2) {
+		else if (x == m_boardSize/2 - 1 || x == m_boardSize/2) {
 			return Player::Ocupant::White;
 		}
 	}
@@ -160,7 +194,6 @@ int Board::changeOponentTiles(int x, int y)
 	changeTiles(x, y, {1, 0});
 	changeTiles(x, y, {0, -1});
 	changeTiles(x, y, {0, 1});
-	m_currentPlayer->increaseScoreBy(score);
 
 	return score;
 }
@@ -217,7 +250,7 @@ int Board::checkDirection(int x, int y, const Direction &init, const Direction &
 
 bool Board::tileExists(int x, int y)
 {
-	return x >= 0 && x < m_tiles.size() && y >= 0 && y < m_tiles.size();
+	return x >= 0 && x < m_boardSize && y >= 0 && y < m_boardSize;
 }
 
 void Board::findBestTileCapture()
@@ -226,8 +259,8 @@ void Board::findBestTileCapture()
 	int bestX = -1;
 	int bestY = -1;
 
-	for (size_t i = 0; i < m_tiles.size(); i++) {
-		for (size_t j = 0; j < m_tiles.size(); j++) {
+	for (size_t i = 0; i < m_boardSize; i++) {
+		for (size_t j = 0; j < m_boardSize; j++) {
 			int score = isTilePlayable(j, i);
 			if (score > bestScore) {
 				bestScore = score;
@@ -245,7 +278,9 @@ void Board::findBestTileCapture()
 		m_gameOver = true;
 	}
 
-	m_currentPlayer->increaseScoreBy(bestScore);
+	for(auto &player : m_players) {
+		player->setScore(getPlayerScore(player));
+	}
 	m_currentPlayer = m_currentPlayer == m_players.front() ? m_players.back() : m_players.front();
 	if (!isGamePlayable()) {
 		m_gameOver = true;
@@ -254,8 +289,8 @@ void Board::findBestTileCapture()
 
 bool Board::isGamePlayable()
 {
-	for (size_t i = 0; i < m_tiles.size(); i++) {
-		for (size_t j = 0; j < m_tiles.size(); j++) {
+	for (size_t i = 0; i < m_boardSize; i++) {
+		for (size_t j = 0; j < m_boardSize; j++) {
 			if (isTilePlayable(j, i) > 0) {
 				return true;
 			}
@@ -263,3 +298,13 @@ bool Board::isGamePlayable()
 	}
 	return false;
 }
+
+int Board::getPlayerScore(std::shared_ptr<Player> player) const
+{
+	return std::accumulate(m_tiles.begin(), m_tiles.end(), 0, [&] (int sum, std::vector<Tile> row) {
+		return std::accumulate(row.begin(), row.end(), sum, [&] (int sum, Tile tile) {
+			return tile.belongsToUs(player) ? sum + 1 : sum;
+		});
+	});
+}
+

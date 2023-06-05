@@ -14,7 +14,8 @@ public:
 
 	explicit Player(int id, const std::string &name, Ocupant ocupation, const std::string &texturePath, int width, int height);
 	int score() const;
-	void increaseScoreBy(int score) { m_score = m_score + score; }
+	void setScore(int score) { m_score = score; }
+	void resetScore() { m_score = 0; }
 	int id() const;
 	const std::string &name() const;
 	Ocupant ocupation() const;

@@ -10,7 +10,6 @@ class Tile
 public:
 	explicit Tile(std::shared_ptr<Player> ocupant, ImColor color);
 
-
 	void setOcupant(const std::shared_ptr<Player> &ocupant) { m_ocupant = ocupant; }
 	bool belongsToOponent(const std::shared_ptr<Player> &player) const;
 	bool belongsToUs(const std::shared_ptr<Player> &player) const;

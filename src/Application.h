@@ -30,6 +30,7 @@ public:
 	~Application();
 
 	Application &addLayer(const std::shared_ptr<Layer> &layer);
+	std::shared_ptr<Layer> getLayer(const std::string &name);
 	void run();
 
 private:

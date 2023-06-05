@@ -3,13 +3,13 @@ add_library(lib
 	Application.h
 	Board.cpp
 	Board.h
-	Demo.cpp
-	Demo.h
 	Image.cpp
 	Image.h
 	Layer.h
 	Player.cpp
 	Player.h
+	Status.h
+	Status.cpp
 	Tile.h
 	Tile.cpp
 )
