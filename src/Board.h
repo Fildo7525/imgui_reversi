@@ -21,6 +21,8 @@ private:
 		int y;
 	};
 
+	void initTiles();
+
 	/**
 	 * @brief Detects wether the coordinates are in the middle of the board and who is the owner.
 	 *
@@ -36,8 +38,12 @@ private:
 	int checkDirection(int x, int y, const Direction &init, const Direction &dir);
 	bool tileExists(int x, int y);
 
+	void findBestTileCapture();
+	bool isGamePlayable();
+
 private:
 	std::shared_ptr<Player> m_currentPlayer;
 	std::vector<std::shared_ptr<Player>> m_players;
 	Tiles m_tiles;
+	bool m_gameOver;
 };
