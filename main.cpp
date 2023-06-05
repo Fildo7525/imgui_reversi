@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 			"BoardGame",
 			1150,
 			710,
-			true,
+			false,
 			false,
 			"/usr/share/fonts/BS/BitstromWeraNerdFont-Regular.ttf"
 		},

@@ -15,6 +15,9 @@ public:
 	void render() override;
 
 private:
+	Player::Ocupant middleTilePlayer(int y, int x);
+
+private:
 	std::shared_ptr<Player> m_currentPlayer;
 	std::vector<std::shared_ptr<Player>> m_players;
 	std::vector<std::vector<Tile>> m_tiles;
