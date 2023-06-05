@@ -12,9 +12,7 @@ int main(int argc, char *argv[])
 			false,
 			false,
 			"/usr/share/fonts/BS/BitstromWeraNerdFont-Regular.ttf"
-		},
-		Application::RenderBackend::WaitEvents
-	);
+		});
 
 	app->addLayer(std::make_shared<Board>());
 	

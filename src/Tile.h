@@ -13,7 +13,9 @@ public:
 	void select() { m_selected = true; }
 	void unselect() { m_selected = false; }
 
-	void setOcupant(std::shared_ptr<Player> ocupant) { m_ocupant = ocupant; }
+	void setOcupant(const std::shared_ptr<Player> &ocupant) { m_ocupant = ocupant; }
+	bool belongsToOponent(const std::shared_ptr<Player> &player) const;
+	bool belongsToUs(const std::shared_ptr<Player> &player) const;
 
 	ImColor color() const { return m_color; }
 	bool selected() const { return m_selected; }

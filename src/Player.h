@@ -14,10 +14,11 @@ public:
 
 	explicit Player(int id, const std::string &name, Ocupant ocupation, const std::string &texturePath, int width, int height);
 	int score() const;
+	void increaseScore() { ++m_score; }
 	int id() const;
 	const std::string &name() const;
 	Ocupant ocupation() const;
-	GLuint texture() const { return m_texture; }
+	GLuint texture();
 	int textureWidth() const { return m_width; }
 	int textureHeight() const { return m_height; }
 
@@ -29,4 +30,5 @@ private:
 	int m_width;
 	int m_height;
 	GLuint m_texture;
+	const std::string m_texturePath;
 };

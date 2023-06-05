@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "Image.h"
+#include "imgui.h"
 
 Player::Player(int id, const std::string &name, Ocupant ocupation, const std::string &texturePath, int width, int height)
 	: m_score(0)
@@ -8,10 +9,12 @@ Player::Player(int id, const std::string &name, Ocupant ocupation, const std::st
 	, m_ocupation(ocupation)
 	, m_width(width)
 	, m_height(height)
+	, m_texturePath(texturePath)
 {
 	int h;
 	int w;
-	LoadTextureFromFile(texturePath.c_str(), &m_texture, &w, &h);
+
+	LoadTextureFromFile(m_texturePath.c_str(), &m_texture, &w, &h);
 }
 
 int Player::score() const
@@ -32,5 +35,10 @@ const std::string &Player::name() const
 Player::Ocupant Player::ocupation() const
 {
 	return m_ocupation;
+}
+
+GLuint Player::texture()
+{
+	return m_texture;
 }
 
