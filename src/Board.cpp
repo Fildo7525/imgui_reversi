@@ -61,10 +61,12 @@ void Board::render()
 
 	ImGui::Begin("Board", NULL, m_windowFlags);
 
+	int buttonSize = (ImGui::GetWindowSize().x - 35) / m_boardSize;
+
 	for (int y = 0; y < m_boardSize; y++) {
 		for (int x = 0; x < m_tiles.front().size(); x++) {
 			if (x > 0) {
-				ImGui::SameLine(x*84+8);
+				ImGui::SameLine(x*(buttonSize+4) + 8);
 			}
 			int id = y * m_boardSize + x;
 			ImGui::PushID(id);
@@ -74,12 +76,12 @@ void Board::render()
 				setButtonColor(x, y);
 				int h = m_tiles[y][x].ocupant()->textureHeight();
 				int w = m_tiles[y][x].ocupant()->textureWidth();
-				ImGui::ImageButton((void *)(intptr_t)m_tiles[y][x].ocupant()->texture(), ImVec2(w-8, h-6));
+				ImGui::ImageButton((void *)(intptr_t)m_tiles[y][x].ocupant()->texture(), ImVec2(buttonSize-8, buttonSize-6));
 				ImGui::PopStyleColor(2);
 			}
 			else {
 				setButtonColor(x, y);
-				if (ImGui::Button("", ImVec2(80, 80))) {
+				if (ImGui::Button("", ImVec2(buttonSize, buttonSize))) {
 					if (isTilePlayable(x, y)) {
 						m_tiles[y][x].setOcupant(m_currentPlayer);
 						changeOponentTiles(x, y);
