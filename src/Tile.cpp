@@ -18,7 +18,7 @@ bool Tile::belongsToOponent(const std::shared_ptr<Player> &player) const
 
 bool Tile::belongsToUs(const std::shared_ptr<Player> &player) const
 {
-	return m_ocupant == player || m_ocupant->ocupation() == Player::Ocupant::Empty;
+	return m_ocupant == player;
 }
 
 std::shared_ptr<Player> Tile::ocupant() const

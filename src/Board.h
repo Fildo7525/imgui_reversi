@@ -29,11 +29,11 @@ private:
 	 * @return Ocupant of the tile.
 	 */
 	Player::Ocupant middleTilePlayer(int y, int x);
-	void changeOponentTiles(Tiles &tiles, int x, int y);
+	int changeOponentTiles(int x, int y);
 	void setButtonColor(int x, int y);
-	bool isTilePlayable(int x, int y);
+	int isTilePlayable(int x, int y);
 
-	bool checkDirection(int x, int y, Direction dir);
+	int checkDirection(int x, int y, const Direction &init, const Direction &dir);
 	bool tileExists(int x, int y);
 
 private:

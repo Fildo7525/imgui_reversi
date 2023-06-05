@@ -4,6 +4,7 @@
 #include "imgui_impl_opengl3.h"
 
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <functional>
 
@@ -76,7 +77,7 @@ void Board::render()
 					if (isTilePlayable(x, y)) {
 						m_tiles[y][x].select();
 						m_tiles[y][x].setOcupant(m_currentPlayer);
-						changeOponentTiles(m_tiles, x, y);
+						m_currentPlayer->increaseScoreBy(changeOponentTiles(x, y));
 						m_currentPlayer = m_currentPlayer == m_players.front() ? m_players.back() : m_players.front();
 					}
 				}
@@ -102,36 +103,30 @@ Player::Ocupant Board::middleTilePlayer(int y, int x)
 	return Player::Ocupant::Empty;
 }
 
-void Board::changeOponentTiles(Tiles &tiles, int x, int y)
+int Board::changeOponentTiles(int x, int y)
 {
-	auto checkTile = [this, &tiles] (int x, int y) -> bool {
-		return tiles[y][x].ocupant()->ocupation() != m_currentPlayer->ocupation() && tiles[y][x].ocupant()->ocupation() != Player::Ocupant::Empty;
+	int score = 0;
+
+	auto changeTiles = [this, &score] (int x, int y, Direction dir) {
+		score = checkDirection(x, y, {x, y}, dir);
+		if (score) {
+			int tmpx = x + dir.x;
+			int tmpy = y + dir.y;
+			while (m_tiles[tmpy][tmpx].ocupant() != m_currentPlayer) {
+				m_tiles[tmpy][tmpx].setOcupant(m_currentPlayer);
+				tmpx += dir.x;
+				tmpy += dir.y;
+			}
+		}
 	};
 
-	if (x > 0) {
-		if (checkTile(x - 1, y)) {
-			tiles[y][x - 1].setOcupant(m_currentPlayer);
-			changeOponentTiles(tiles, x - 1, y);
-		}
-	}
-	if (y > 0) {
-		if (checkTile(x, y - 1)) {
-			tiles[y - 1][x].setOcupant(m_currentPlayer);
-			changeOponentTiles(tiles, x, y - 1);
-		}
-	}
-	if (x < tiles.size() - 1) {
-		if (checkTile(x + 1, y)) {
-			tiles[y][x + 1].setOcupant(m_currentPlayer);
-			changeOponentTiles(tiles, x + 1, y);
-		}
-	}
-	if (y < tiles.size() - 1) {
-		if (checkTile(x, y + 1)) {
-			tiles[y + 1][x].setOcupant(m_currentPlayer);
-			changeOponentTiles(tiles, x, y + 1);
-		}
-	}
+	changeTiles(x, y, {-1, 0});
+	changeTiles(x, y, {1, 0});
+	changeTiles(x, y, {0, -1});
+	changeTiles(x, y, {0, 1});
+	m_currentPlayer->increaseScoreBy(score);
+
+	return score;
 }
 
 void Board::setButtonColor(int x, int y)
@@ -147,36 +142,43 @@ void Board::setButtonColor(int x, int y)
 	}
 }
 
-bool Board::isTilePlayable(int x, int y)
+int Board::isTilePlayable(int x, int y)
 {
 	if (m_tiles[y][x].ocupant()->ocupation() == Player::Ocupant::Empty) {
-		return (checkDirection(x - 1, y, {-1, 0})
-				|| checkDirection(x + 1, y, {1, 0})
-				|| checkDirection(x, y - 1, {0, -1})
-				|| checkDirection(x, y + 1, {0, -1}));
+		int score = checkDirection(x, y, {x, y}, {-1, 0})
+				+ checkDirection(x, y, {x, y}, {1, 0})
+				+ checkDirection(x, y, {x, y}, {0, -1})
+				+ checkDirection(x, y, {x, y}, {0, 1});
+		return score;
 	}
-	return false;
+	return 0;
 }
 
-bool Board::checkDirection(int x, int y, Direction dir) {
-	if (tileExists(x, y)) {
-		if (m_tiles[y][x].belongsToOponent(m_currentPlayer)) {
-			return true;
-		}
-		else if (m_tiles[y][x].belongsToUs(m_currentPlayer)) {
-			return false;
-		}
+int Board::checkDirection(int x, int y, const Direction &init, const Direction &dir) {
+	int score = 0;
 
-		bool ret = checkDirection(x + dir.x, y + dir.y, dir);
-		if (ret) {
-			m_currentPlayer->increaseScore();
+	std::function<bool(int, int)> check = [this, &init, &dir, &score, &check] (int x, int y) {
+		x += dir.x;
+		y += dir.y;
+		if (tileExists(x, y)) {
+			if (m_tiles[y][x].belongsToOponent(m_currentPlayer)) {
+				score++;
+				return check(x, y);
+			}
+			else if (m_tiles[y][x].belongsToUs(m_currentPlayer)) {
+				return (std::abs(init.x - x) + std::abs(init.y - y)) > 1;
+			}
 		}
-		return ret;
+		return false;
+	};
+
+	if (!check(x, y)) {
+		score = 0;
 	}
-	return false;
-};
+	return score;
+}
 
 bool Board::tileExists(int x, int y)
 {
-	return x > 0 && x < m_tiles.size() - 1 && y > 0 && y < m_tiles.size() - 1;
+	return x >= 0 && x < m_tiles.size() && y >= 0 && y < m_tiles.size();
 }
