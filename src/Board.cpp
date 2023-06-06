@@ -63,7 +63,7 @@ void Board::render()
 
 	ImGui::Begin("Board", NULL, m_windowFlags);
 
-	int buttonSize = (ImGui::GetWindowSize().x - 35) / m_boardSize - 1;
+	int buttonSize = (ImGui::GetWindowSize().x - 35) / m_boardSize - 2;
 
 	for (int y = 0; y < m_boardSize; y++) {
 		for (int x = 0; x < m_tiles.front().size(); x++) {

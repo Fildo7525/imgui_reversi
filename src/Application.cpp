@@ -85,11 +85,11 @@ void Application::run()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-
-		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-		if (m_showDemoWindow) {
-			ImGui::ShowDemoWindow(&m_showDemoWindow);
+		if (m_config.enableDocking) {
+			ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+			dockspace_flags |= ImGuiDockNodeFlags_NoResize
+							| ImGuiDockNodeFlags_AutoHideTabBar;
+			ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockspace_flags);
 		}
 
 		for(auto &layer : m_layers) {
@@ -223,8 +223,6 @@ void Application::Init()
 	//ImFont* font = m_io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, m_io.Fonts->GetGlyphRangesJapanese());
 	//IM_ASSERT(font != nullptr);
 
-	// Our state
-	m_showDemoWindow = true;
 	m_clearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 }
 

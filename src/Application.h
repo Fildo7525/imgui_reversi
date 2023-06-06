@@ -17,6 +17,7 @@ public:
 		int height;
 		bool resizable;
 		bool fullscreen;
+		bool enableDocking;
 		std::string font;
 	};
 
@@ -37,6 +38,7 @@ public:
 	std::shared_ptr<T> getLayer(const std::string &name);
 
 	Application &setWindowSize(int width, int height);
+	GLFWwindow* window() const { return m_window; }
 	void run();
 
 private:
@@ -53,9 +55,6 @@ private:
 
 	/// @c RenderBackend enum variable identifying the rendering method.
 	RenderBackend m_renderBackend;
-
-	/// Flag to show the ImGui demo window.
-	bool m_showDemoWindow = true;
 
 	/// Flag to show the ImGui metrics window.
 	ImVec4 m_clearColor;

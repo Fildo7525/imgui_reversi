@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 		710,
 		false,
 		false,
+		true,
 		"/usr/share/fonts/BS/BitstromWeraNerdFont-Regular.ttf"
 	});
 
