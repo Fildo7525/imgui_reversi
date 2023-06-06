@@ -12,12 +12,12 @@ class Application
 public:
 	struct Config
 	{
-		const std::string &title;
+		std::string title;
 		int width;
 		int height;
 		bool resizable;
 		bool fullscreen;
-		const std::string &font;
+		std::string font;
 	};
 
 	enum class RenderBackend
@@ -26,14 +26,21 @@ public:
 		WaitEvents,
 	};
 
-	explicit Application(const Application::Config &config, Application::RenderBackend renderBackend = Application::RenderBackend::Polling);
+	static std::shared_ptr<Application> create(
+		const Application::Config &config,
+		Application::RenderBackend renderBackend = Application::RenderBackend::Polling);
 	~Application();
 
 	Application &addLayer(const std::shared_ptr<Layer> &layer);
-	std::shared_ptr<Layer> getLayer(const std::string &name);
+
+	template <typename T>
+	std::shared_ptr<T> getLayer(const std::string &name);
+
+	Application &setWindowSize(int width, int height);
 	void run();
 
 private:
+	explicit Application(const Application::Config &config, Application::RenderBackend renderBackend);
 	void Init();
 	void Cleanup();
 
@@ -56,4 +63,20 @@ private:
 	/// All the windows displayed in the application.
 	std::vector<std::shared_ptr<Layer>> m_layers;
 };
+
+template <typename T>
+std::shared_ptr<T> Application::getLayer(const std::string &name)
+{
+	if (!std::is_base_of<Layer, T>::value) {
+		return nullptr;
+	}
+
+	for (auto &layer : m_layers) {
+		if (layer->getName() == name) {
+			return std::static_pointer_cast<T>(layer);
+		}
+	}
+
+	return nullptr;
+}
 

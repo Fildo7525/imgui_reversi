@@ -4,6 +4,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <stdio.h>
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -27,11 +28,11 @@ static void glfw_error_callback(int error, const char* description)
 	fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-Application::Application(const Application::Config &config, Application::RenderBackend renderBackend)
-	: m_renderBackend(renderBackend)
-	, m_config(config)
+
+std::shared_ptr<Application> Application::create(const Application::Config &config,
+												 Application::RenderBackend renderBackend)
 {
-	Init();
+	return std::shared_ptr<Application>(new Application(config, renderBackend));
 }
 
 Application::~Application()
@@ -46,14 +47,12 @@ Application &Application::addLayer(const std::shared_ptr<Layer> &layer)
 	return *this;
 }
 
-std::shared_ptr<Layer> Application::getLayer(const std::string &name)
+Application &Application::setWindowSize(int width, int height)
 {
-	for (auto &layer : m_layers) {
-		if (layer->getName() == name) {
-			return layer;
-		}
-	}
-	return nullptr;
+	m_config.height = height;
+	m_config.width = width;
+	glfwSetWindowSize(m_window, width, height);
+	return *this;
 }
 
 void Application::run()
@@ -89,8 +88,9 @@ void Application::run()
 		ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-		if (m_showDemoWindow)
+		if (m_showDemoWindow) {
 			ImGui::ShowDemoWindow(&m_showDemoWindow);
+		}
 
 		for(auto &layer : m_layers) {
 			layer->render();
@@ -118,6 +118,13 @@ void Application::run()
 
 		glfwSwapBuffers(m_window);
 	}
+}
+
+Application::Application(const Application::Config &config, Application::RenderBackend renderBackend)
+	: m_renderBackend(renderBackend)
+	, m_config(config)
+{
+	Init();
 }
 
 void Application::Init()
