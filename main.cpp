@@ -9,10 +9,9 @@ int main(int argc, char *argv[])
 		"BoardGame",
 		1150,
 		710,
-		false,
-		false,
 		true,
-		"/usr/share/fonts/BS/BitstromWeraNerdFont-Regular.ttf"
+		false,
+		true
 	});
 
 	app->addLayer(std::make_shared<Board>(8));

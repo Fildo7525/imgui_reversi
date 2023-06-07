@@ -160,6 +160,7 @@ void Application::Init()
 	m_window = glfwCreateWindow(m_config.width, m_config.height, m_config.title.c_str(), nullptr, nullptr);
 	if (m_window == nullptr)
 		return;
+
 	glfwMakeContextCurrent(m_window);
 	glfwSwapInterval(1); // Enable vsync
 
@@ -215,7 +216,9 @@ void Application::Init()
 		io.Fonts->AddFontFromFileTTF(m_config.font.c_str(), 18.0f);
 	}
 	else {
-		io.Fonts->AddFontDefault();
+		ImFontConfig cfg;
+		cfg.SizePixels = 18.0f;
+		io.Fonts->AddFontDefault(&cfg);
 	}
 	//m_io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
 	//m_io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);

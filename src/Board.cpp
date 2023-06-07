@@ -34,7 +34,7 @@ void Board::render()
 {
 	if (m_gameOver) {
 		static ImGuiWindowFlags windowFlags = m_windowFlags;
-		windowFlags ^= ImGuiWindowFlags_NoMove;
+		// windowFlags ^= ImGuiWindowFlags_NoMove;
 		ImGui::Begin("Game Over", NULL, windowFlags);
 
 		int user = scores().front();
@@ -63,7 +63,7 @@ void Board::render()
 
 	ImGui::Begin("Board", NULL, m_windowFlags);
 
-	int buttonSize = (ImGui::GetWindowSize().x - 35) / m_boardSize - 2;
+	int buttonSize = (ImGui::GetWindowSize().x - 35) / m_boardSize - 1;
 
 	for (int y = 0; y < m_boardSize; y++) {
 		for (int x = 0; x < m_tiles.front().size(); x++) {
